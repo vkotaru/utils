@@ -31,7 +31,7 @@ opts_default.plot.LineWidthOrder = 2;
 opts_default.plot.no_of_plots = 1;
 opts_default.plot.data.x{1} = [];
 opts_default.plot.data.y{1} = [];
-opts_default.plot.data.z{1} = [];
+opts_default.plot.data.z = [];
 opts_default.plot.type = 'plot'; % scatter
 opts_default.plot.dim = '2D'; % 3D
 opts_default.plot.legend.name = {'','',''};
@@ -73,6 +73,15 @@ opts_default.print.ext = '.eps';
 % struct_overlay is one awesome function :)
 % thanks Eric Cousineau!
 opts = struct_overlay(opts_default, opts_in);
+if opts.subplot.flag
+    for i = 1:opts.subplot.shape(1)
+        for j = 1:opts.subplot.shape(2)
+            temp_subplot.plot(i,j) = struct_overlay(opts_default.plot,opts.subplot.plot(i,j));
+        end
+    end
+    opts.subplot = rmfield(opts.subplot,'plot');
+    opts.subplot.plot = temp_subplot.plot;
+end
 
 % verifying print options
 if isempty(opts.print_pos_sz)
@@ -158,13 +167,12 @@ if stage1_flag == true
         %labels
         xl = xlabel(opts.plot.labels.x.name,'Interpreter','Latex');
         xl.FontSize = opts.plot.labels.x.fontsize;
-        yl = xlabel(opts.plot.labels.y.name,'Interpreter','Latex');
+        yl = ylabel(opts.plot.labels.y.name,'Interpreter','Latex');
         yl.FontSize = opts.plot.labels.y.fontsize;
-        zl = xlabel(opts.plot.labels.z.name,'Interpreter','Latex');
+        zl = zlabel(opts.plot.labels.z.name,'Interpreter','Latex');
         zl.FontSize = opts.plot.labels.z.fontsize;
         
         grid on;
-        grid off;
         
     elseif opts.subplot.flag
         % i -->
@@ -174,6 +182,7 @@ if stage1_flag == true
                 if i*j > opts.subplot.no_of_plots
                     break
                 end
+                fprintf('generating plot for subplot (%d, %d) and plot number %d \n',i,j,i*j);
                 subplot(opts.subplot.shape(1),opts.subplot.shape(2),i*j); hold on
                 ax = gca;
                 set(ax,'ColorOrder',opts.plot.ColorOrder);
