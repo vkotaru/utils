@@ -1,4 +1,4 @@
-function animate_obj(opts_in)
+function animate_obj(opts_in,drawObject)
 % function to animate dynamics
 
 %% default options
@@ -17,9 +17,9 @@ opts_default.vid.Quality = 100;
 opts_default.vid.FrameRate = 24;
 
 % objects
-opts_default.figure.x.limits = [-2 2];
-opts_default.figure.y.limits = [-2 2];
-opts_default.figure.z.limits = [0 1];
+opts_default.figure.x.limits = [-4 4];
+opts_default.figure.y.limits = [-4 4];
+opts_default.figure.z.limits = [-4 4];
 opts_default.figure.scale = 1.5;
 opts_default.hist = 100;
 % plots
@@ -28,7 +28,8 @@ opts_default.plot3D.N = 1;
 opts_default.obj.N = 1; 
 
 %% get inputs
-opts = struct_overlay(opts_default,opts_in, 'AllowNew', true);
+options_struct_overlay.AllowNew = true;
+opts = struct_overlay(opts_default,opts_in, options_struct_overlay);
 
 %% initialize the animation figure and axes
     fig_handle = figure;
@@ -62,7 +63,7 @@ opts = struct_overlay(opts_default,opts_in, 'AllowNew', true);
         opts.figure.scale*screen_factor*figure_y_size]);
     set(fig_handle,'MenuBar', 'none');
     axes1 = axes;
-    set(axes1,'XLim',figure_x_limits,'YLim',figure_y_limits);
+    set(axes1,'XLim',opts.figure.x.limits,'YLim',opts.figure.y.limits, 'ZLim', opts.figure.z.limits);
 %     set(axes1,'Position',[0 0 1 1]);
 %     set(axes1,'Color','w');
 %     set(axes1,'TickDir','out');
@@ -82,6 +83,13 @@ opts = struct_overlay(opts_default,opts_in, 'AllowNew', true);
     if size(x,2)>size(x,1)
         x = x';
     end
+    if isrow(td)
+        td = td';
+    end
+    if size(xd,2)>size(xd,1)
+        xd = xd';
+    end
+
     box on;
     
     [t, x] = even_sample(t, x, RATE,opts.interp_type);
@@ -109,16 +117,21 @@ end
 hist = opts.hist ;
 %% animate
     for i=1:length(t)
-        drawQuadrotor(axes1, x(i,:)');
+        % drawQuadrotor(axes1, x(i,:)');
+        drawObject(axes1,x(i,:)'); hold on;
         
-        plot(x(max(1,i-hist):i, 1), x(max(1,i-hist):i, 2), 'k') ;
+        plot3(x(max(1,i-hist):i, 1), x(max(1,i-hist):i, 2), x(max(1,i-hist):i, 3), 'k') ;
     %         plot3(x(max(1,i-hist):i, 1)-L*x(max(1,i-hist):i,7), x(max(1,i-hist):i, 2)-L*x(max(1,i-hist):i,8), x(max(1,i-hist):i, 3)-L*x(max(1,i-hist):i,9), 'r') ;
         s = sprintf('Running\n t = %1.2fs \n 1/%d realtime speed',t(i), RATE/25);
         text(x(i,1)-1.5,x(i,2)+1.5,s,'FontAngle','italic','FontWeight','bold');
+
+        figure_x_limits_ = opts.figure.x.limits+x(i,1);
+        figure_y_limits_ = opts.figure.y.limits+x(i,2);
+        figure_z_limits_ = opts.figure.z.limits+x(i,3);
+        set(axes1,'XLim',figure_x_limits_,'YLim',figure_y_limits_,'ZLim',figure_z_limits_);
+
         drawnow;
-        figure_x_limits_ = figure_x_limits+x(i,1);
-        figure_y_limits_ = figure_y_limits+x(i,2);
-        set(axes1,'XLim',figure_x_limits_,'YLim',figure_y_limits_);
+                
         if opts.vid.MAKE_MOVIE
             M(:,i) = getframe; 
             % Write data to video file
