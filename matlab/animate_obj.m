@@ -121,7 +121,9 @@ hist = opts.hist ;
         drawObject(axes1,x(i,:)'); hold on;
         
         plot3(x(max(1,i-hist):i, 1), x(max(1,i-hist):i, 2), x(max(1,i-hist):i, 3), 'k') ;
-    %         plot3(x(max(1,i-hist):i, 1)-L*x(max(1,i-hist):i,7), x(max(1,i-hist):i, 2)-L*x(max(1,i-hist):i,8), x(max(1,i-hist):i, 3)-L*x(max(1,i-hist):i,9), 'r') ;
+        plot3(x(max(1,i-hist):i, 4), x(max(1,i-hist):i, 5), x(max(1,i-hist):i, 6), 'r') ;
+
+        %         plot3(x(max(1,i-hist):i, 1)-L*x(max(1,i-hist):i,7), x(max(1,i-hist):i, 2)-L*x(max(1,i-hist):i,8), x(max(1,i-hist):i, 3)-L*x(max(1,i-hist):i,9), 'r') ;
         s = sprintf('Running\n t = %1.2fs \n 1/%d realtime speed',t(i), RATE/25);
         text(x(i,1)-1.5,x(i,2)+1.5,s,'FontAngle','italic','FontWeight','bold');
 
