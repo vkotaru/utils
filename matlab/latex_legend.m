@@ -1,4 +1,4 @@
-function latex_legend(name_str,varargin)
+function [t] = latex_legend(name_str,varargin)
 t = legend(name_str);
 set(t,'Interpreter','Latex'); 
 if nargin > 1

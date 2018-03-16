@@ -31,7 +31,7 @@ end
 set(fig_handle, 'PaperPositionMode', 'manual');
 set(fig_handle, 'PaperUnits', 'inches');
 set(fig_handle, 'PaperPosition', opts.print_pos_sz); 
-print(opts.print.filename,'-depsc2','-r300');%
+print(opts.print.filename,opts.print.ext,'-r300');%
 
 if nargin > 1
     varargout{1} = gcf;
