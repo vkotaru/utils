@@ -3,7 +3,7 @@ function animate_obj(opts_in,drawObject)
 
 %% default options
 % data
-opts_default.RATE = 25 * 2;
+opts_default.RATE = 25;
 opts_default.t = [];
 opts_default.x = [];
 opts_default.xd = [0;0];
@@ -22,17 +22,23 @@ opts_default.figure.y.limits = [-4 4];
 opts_default.figure.z.limits = [-4 4];
 opts_default.figure.scale = 1.5;
 opts_default.hist = 100;
+
+opts_default.figure.moving = 0;
 % plots
 opts_default.plot2D.N = 1;
 opts_default.plot3D.N = 1;
 opts_default.obj.N = 1; 
+
+opts_default.no_of_extras = 1;
+opts_default.box_dim = [5;5;2];
+opts_default.box_center = [2.5;2.5;1];
 
 %% get inputs
 options_struct_overlay.AllowNew = true;
 opts = struct_overlay(opts_default,opts_in, options_struct_overlay);
 
 %% initialize the animation figure and axes
-    fig_handle = figure;
+    fig_handle = figure; hold on;
 
     set(0,'Units','pixels')
     scnsize = get(0,'ScreenSize');
@@ -119,17 +125,38 @@ hist = opts.hist ;
     for i=1:length(t)
         % drawQuadrotor(axes1, x(i,:)');
         drawObject(axes1,x(i,:)'); hold on;
+        drawBox(opts.box_dim, opts.box_center); hold on;
+    
+        if opts.no_of_extras > 0
+            scatter3(x(end, 1), x(end, 2), x(end, 3), 'MarkerEdgeColor','k',...
+                'MarkerFaceColor',[0.75 0 0]); 
+            scatter3(x(1, 1), x(1, 2), x(1, 3), 'MarkerEdgeColor','k',...
+                'MarkerFaceColor',[0 0 0.75]);     
+            plot3(x(max(1,i-hist):i, 1), x(max(1,i-hist):i, 2), x(max(1,i-hist):i, 3), 'k') ;
+        end
         
-        plot3(x(max(1,i-hist):i, 1), x(max(1,i-hist):i, 2), x(max(1,i-hist):i, 3), 'k') ;
-        plot3(x(max(1,i-hist):i, 4), x(max(1,i-hist):i, 5), x(max(1,i-hist):i, 6), 'r') ;
+        if opts.no_of_extras > 1     
+            scatter3(x(end, 4), x(end, 5), x(end, 6), 'MarkerEdgeColor','k',...
+            'MarkerFaceColor',[0.75 0 0]); 
+            scatter3(x(1, 4), x(1, 5), x(1, 6), 'MarkerEdgeColor','k',...
+            'MarkerFaceColor',[0 0 0.75]);    
+            plot3(x(max(1,i-hist):i, 4), x(max(1,i-hist):i, 5), x(max(1,i-hist):i, 6), 'r') ;   
+        end
+        
+        if opts.no_of_extras > 2
+            scatter3(x(end, 7), x(end, 8), x(end, 9), 'MarkerEdgeColor','k',...
+                'MarkerFaceColor',[0.75 0 0]); 
+            scatter3(x(1, 7), x(1, 8), x(1, 9), 'MarkerEdgeColor','k',...
+                'MarkerFaceColor',[0 0 0.75]);      
+            plot3(x(max(1,i-hist):i, 7), x(max(1,i-hist):i, 8), x(max(1,i-hist):i, 9), 'b') ;
+        end
+%         plot3(x(max(1,i-hist):i, 1)-L*x(max(1,i-hist):i,7), x(max(1,i-hist):i, 2)-L*x(max(1,i-hist):i,8), x(max(1,i-hist):i, 3)-L*x(max(1,i-hist):i,9), 'r') ;
+%         s = sprintf('Running\n t = %1.2fs \n 1/%d realtime speed',t(i), RATE/25);
+%         text(x(i,1)-1.5,x(i,2)+1.5,s,'FontAngle','italic','FontWeight','bold');
 
-        %         plot3(x(max(1,i-hist):i, 1)-L*x(max(1,i-hist):i,7), x(max(1,i-hist):i, 2)-L*x(max(1,i-hist):i,8), x(max(1,i-hist):i, 3)-L*x(max(1,i-hist):i,9), 'r') ;
-        s = sprintf('Running\n t = %1.2fs \n 1/%d realtime speed',t(i), RATE/25);
-        text(x(i,1)-1.5,x(i,2)+1.5,s,'FontAngle','italic','FontWeight','bold');
-
-        figure_x_limits_ = opts.figure.x.limits+x(i,1);
-        figure_y_limits_ = opts.figure.y.limits+x(i,2);
-        figure_z_limits_ = opts.figure.z.limits+x(i,3);
+        figure_x_limits_ = opts.figure.x.limits+opts.figure.moving*x(i,1);
+        figure_y_limits_ = opts.figure.y.limits+opts.figure.moving*x(i,2);
+        figure_z_limits_ = opts.figure.z.limits+opts.figure.moving*x(i,3);
         set(axes1,'XLim',figure_x_limits_,'YLim',figure_y_limits_,'ZLim',figure_z_limits_);
 
         drawnow;
