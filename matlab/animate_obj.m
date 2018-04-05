@@ -1,4 +1,4 @@
-function animate_obj(opts_in,drawObject)
+function animate_obj(opts_in,drawObject, varargin)
 % function to animate dynamics
 
 %% default options
@@ -30,8 +30,18 @@ opts_default.plot3D.N = 1;
 opts_default.obj.N = 1; 
 
 opts_default.no_of_extras = 1;
+opts_default.xd_flag = 0;
+
 opts_default.box_dim = [5;5;2];
 opts_default.box_center = [2.5;2.5;1];
+opts_default.box_flag  = 1;
+
+% obstalces
+if nargin > 2
+    O = varargin{1};
+else
+    O = [];
+end
 
 %% get inputs
 options_struct_overlay.AllowNew = true;
@@ -125,7 +135,10 @@ hist = opts.hist ;
     for i=1:length(t)
         % drawQuadrotor(axes1, x(i,:)');
         drawObject(axes1,x(i,:)'); hold on;
-        drawBox(opts.box_dim, opts.box_center); hold on;
+        
+        if opts.box_flag
+            drawBox(opts.box_dim, opts.box_center); hold on;
+        end
     
         if opts.no_of_extras > 0
             scatter3(x(end, 1), x(end, 2), x(end, 3), 'MarkerEdgeColor','k',...
@@ -133,6 +146,10 @@ hist = opts.hist ;
             scatter3(x(1, 1), x(1, 2), x(1, 3), 'MarkerEdgeColor','k',...
                 'MarkerFaceColor',[0 0 0.75]);     
             plot3(x(max(1,i-hist):i, 1), x(max(1,i-hist):i, 2), x(max(1,i-hist):i, 3), 'k') ;
+            if opts.xd_flag 
+                plot3(xd(max(1,i-hist):i, 1), xd(max(1,i-hist):i, 2), xd(max(1,i-hist):i, 3), 'r') ;
+            end
+            
         end
         
         if opts.no_of_extras > 1     
@@ -149,6 +166,10 @@ hist = opts.hist ;
             scatter3(x(1, 7), x(1, 8), x(1, 9), 'MarkerEdgeColor','k',...
                 'MarkerFaceColor',[0 0 0.75]);      
             plot3(x(max(1,i-hist):i, 7), x(max(1,i-hist):i, 8), x(max(1,i-hist):i, 9), 'b') ;
+        end
+        
+        for j = 1:length(O)
+            O{j}.plot;
         end
 %         plot3(x(max(1,i-hist):i, 1)-L*x(max(1,i-hist):i,7), x(max(1,i-hist):i, 2)-L*x(max(1,i-hist):i,8), x(max(1,i-hist):i, 3)-L*x(max(1,i-hist):i,9), 'r') ;
 %         s = sprintf('Running\n t = %1.2fs \n 1/%d realtime speed',t(i), RATE/25);
