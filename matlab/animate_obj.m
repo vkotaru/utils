@@ -77,7 +77,7 @@ opts = struct_overlay(opts_default,opts_in, options_struct_overlay);
     set(fig_handle,'Position', [screen_x_offset screen_y_offset...
         opts.figure.scale*screen_factor*figure_x_size...
         opts.figure.scale*screen_factor*figure_y_size]);
-    set(fig_handle,'MenuBar', 'none');
+%     set(fig_handle,'MenuBar', 'none');
     axes1 = axes;
     set(axes1,'XLim',opts.figure.x.limits,'YLim',opts.figure.y.limits, 'ZLim', opts.figure.z.limits);
 %     set(axes1,'Position',[0 0 1 1]);
@@ -171,6 +171,7 @@ hist = opts.hist ;
         for j = 1:length(O)
             O{j}.plot;
         end
+        alpha(0.4);
 %         plot3(x(max(1,i-hist):i, 1)-L*x(max(1,i-hist):i,7), x(max(1,i-hist):i, 2)-L*x(max(1,i-hist):i,8), x(max(1,i-hist):i, 3)-L*x(max(1,i-hist):i,9), 'r') ;
 %         s = sprintf('Running\n t = %1.2fs \n 1/%d realtime speed',t(i), RATE/25);
 %         text(x(i,1)-1.5,x(i,2)+1.5,s,'FontAngle','italic','FontWeight','bold');
@@ -179,8 +180,14 @@ hist = opts.hist ;
         figure_y_limits_ = opts.figure.y.limits+opts.figure.moving*x(i,2);
         figure_z_limits_ = opts.figure.z.limits+opts.figure.moving*x(i,3);
         set(axes1,'XLim',figure_x_limits_,'YLim',figure_y_limits_,'ZLim',figure_z_limits_);
-
-        drawnow;
+        hold on;
+        xlabel('X');
+        ylabel('Y');
+        zlabel('Z');
+        
+        drawnow;        
+%         datacursormode(fig_handle);
+%         rotate3d on
                 
         if opts.vid.MAKE_MOVIE
             M(:,i) = getframe; 
