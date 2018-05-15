@@ -1,5 +1,5 @@
 function [t] = latex_legend(name_str,varargin)
-t = legend(name_str);
+t = legend(name_str,'location','best');
 set(t,'Interpreter','Latex'); 
 if nargin > 1
    t.FontSize = varargin{1}; 
