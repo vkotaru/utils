@@ -1,11 +1,22 @@
 function [varargout] = print_fig(opts_in, fig_handle)
-% function to generate print plots 
+% function to print figures as eps, pdf etc 
 % useful for writing papers
+%
+% function usage:
+% >> print_fig(opts, fig_handle)
 %
 % options
 % -------
-% i'm too lazy to write about options
-% take a look at the code ;) 
+% opts.print.index = 1;
+% opts.print.pos_sz_stored{1} = [0.25 2.5 8 2.4];
+% opts.print.pos_sz_stored{2}  = [0.25 2.5 8 4];
+% opts.print.pos_sz_stored{3} = [0.25 2.5 8 6.25];
+% opts.print.pos_sz_stored{4} = [0.25 2.5 8 8.5];
+% opts.print_pos_sz = []; % [0.25 0.25 2 2]
+% 
+% opts.print.filename = 'tmp_image';
+% opts.print.ext = '.eps';
+
 
 %% default options
 
@@ -17,7 +28,8 @@ opts_default.print.pos_sz_stored{4} = [0.25 2.5 8 8.5];
 opts_default.print_pos_sz = []; % [0.25 0.25 2 2]
 
 opts_default.print.filename = 'tmp_image';
-opts_default.print.ext = '.eps';
+% opts_default.print.ext = '.eps';
+opts_default.print.ext = '-depsc';
 
 %% extracting information
 
