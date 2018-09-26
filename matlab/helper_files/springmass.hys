@@ -1,0 +1,63 @@
+ /* Spring-Mass System
+ */
+
+SYSTEM springmass  {
+
+INTERFACE { /* Description of variables and constants */
+
+    STATE {
+            REAL x1 [-5,5];
+            REAL x2 [-5,5];
+    }
+
+    INPUT { REAL u1 [-10,10];
+            BOOL u2;
+        }
+
+
+    PARAMETER {
+            /* Spring breakpoint */
+            REAL xm;
+
+            /* Dynamic coefficients */
+            REAL A111,A112,A121,A122,A211,A212,A221,A222;
+            REAL A311,A312,A321,A322,A411,A412,A421,A422;
+            REAL B111,B112,B121,B122,B211,B212,B221,B222;
+            REAL B311,B312,B321,B322,B411,B412,B421,B422;
+    }
+ OUTPUT {
+      REAL y1;
+      REAL y2;
+    }
+}
+
+IMPLEMENTATION {
+    AUX {
+            REAL zx11,zx12,zx21,zx22,zx31,zx32,zx41,zx42;
+            BOOL region;
+    }
+
+    AD {    /* spring region */
+            region = x1-xm <= 0;
+    }
+
+    DA {
+            zx11 = { IF region  & u2  THEN A111*x1+A112*x2+B111*u1+B112};
+            zx12 = { IF region  & u2  THEN A121*x1+A122*x2+B121*u1+B122};
+            zx21 = { IF region  & ~u2 THEN A211*x1+A212*x2+B211*u1+B212};
+            zx22 = { IF region  & ~u2 THEN A221*x1+A222*x2+B221*u1+B222};
+            zx31 = { IF ~region & u2  THEN A311*x1+A312*x2+B311*u1+B312};
+            zx32 = { IF ~region & u2  THEN A321*x1+A322*x2+B321*u1+B322};
+            zx41 = { IF ~region & ~u2 THEN A411*x1+A412*x2+B411*u1+B412};
+            zx42 = { IF ~region & ~u2 THEN A421*x1+A422*x2+B421*u1+B422};
+    }
+
+    CONTINUOUS {    x1=zx11+zx21+zx31+zx41;
+                    x2=zx12+zx22+zx32+zx42;
+    }
+    OUTPUT {
+      y1 = x1;
+      y2 = x2;
+    }
+  }
+}

@@ -83,7 +83,7 @@ opts = struct_overlay(opts_default,opts_in, options_struct_overlay);
 %     set(axes1,'Position',[0 0 1 1]);
 %     set(axes1,'Color','w');
 %     set(axes1,'TickDir','out');
-    axis equal ;
+%     axis equal ;
     
 
 %% extract data
@@ -106,7 +106,7 @@ opts = struct_overlay(opts_default,opts_in, options_struct_overlay);
         xd = xd';
     end
 
-    box on;
+%     box on;
     
     [t, x] = even_sample(t, x, RATE,opts.interp_type);
     t = t+t(1);    

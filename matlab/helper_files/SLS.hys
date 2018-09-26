@@ -1,0 +1,37 @@
+/* System with logic state */
+
+SYSTEM SLS  {
+INTERFACE { /* Description of variables and constants */
+    STATE {
+            REAL x1 [-10,10];
+            BOOL x2;
+    }
+    INPUT { REAL u [-10,10];
+        }
+    PARAMETER {
+
+            /* Lower Bound Point */
+            REAL xlb = -1;
+
+            /* Dynamic coefficients */
+            REAL a = .5;
+            REAL b1 = .1;
+            REAL b2 = .3;
+    }
+}
+
+IMPLEMENTATION {
+    AUX {           BOOL region;
+                    REAL zx1;
+    }
+    AD {  /* PWA Region */
+            region = x1-xlb <= 0;
+    }
+    DA { zx1={IF x2 THEN a*x1+b2*u  ELSE a*x1+b1*u};
+    }
+    CONTINUOUS {    x1=zx1;
+    }
+    AUTOMATA { x2= x2 | region;
+    }
+  }
+}

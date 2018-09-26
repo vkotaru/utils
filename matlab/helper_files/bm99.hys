@@ -1,0 +1,35 @@
+/* 2x2 PWA system */
+
+SYSTEM pwa {
+
+INTERFACE {
+    STATE { REAL x1 [-5,5];
+            REAL x2 [-5,5];
+        }
+    INPUT { REAL u [-1,1];
+        }
+    OUTPUT{ REAL y;
+        }
+    PARAMETER {
+        REAL alpha = 60*pi/180;
+        REAL C = cos(alpha);
+        REAL S = sin(alpha);
+        REAL MLD_epsilon = .0012345;    }
+    }
+
+IMPLEMENTATION {
+        AUX { REAL z1,z2;
+              BOOL sign; }
+        AD  { sign = x1<=0; }
+
+        DA  { z1 = {IF sign THEN 0.8*(C*x1+S*x2)
+                    ELSE 0.8*(C*x1-S*x2) };
+              z2 = {IF sign THEN 0.8*(-S*x1+C*x2)
+                    ELSE 0.8*(S*x1+C*x2) };  }
+
+        CONTINUOUS { x1 = z1;
+                     x2 = z2+u; }
+
+        OUTPUT { y = x2;  }
+      }
+}
