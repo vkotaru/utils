@@ -39,7 +39,7 @@ class BagReader(object):
     """
     Function to read a rosbag and convert it into a mat file
     """
-    def __init__(self,_bag_name=None):
+    def __init__(self,_bag_name=None, _arg=None):
         super(BagReader, self).__init__()
         
         self.name   = None
@@ -50,8 +50,12 @@ class BagReader(object):
 
         if _bag_name == None:
             warnings.warn("bag filename is missing", UserWarning)
+            if _arg == 'read' or _arg == 'save':
+                warnings.warn("bag is NOT read", UserWarning)
         else:
             self.update(_bag_name)
+            if _arg == 'read':
+                self.read()
 
     def update(self, _bag_name):  
         self.name   = _bag_name
@@ -72,59 +76,78 @@ class BagReader(object):
 
     def read(self,arg='all'):
         print('to do!')
-        # if arg == 'all':
-        #     parse_only_ = range(len(self.topics))
-        # else:
-        #     parse_only_ = arg
+        if arg == 'all':
+            parse_index = range(len(self.topics))
+        else:
+            parse_index = arg
 
-        # for i  in parse_only_:
-        #     if self.topics[i] == '/qrotor_offboard/odometry':
-        #         print "Reading topic " + self.topics[i] + '\n'
-        #         tmp = {}
-        #         tmp['position'] = []
-        #         tmp['velocity'] = []
-        #         tmp['euler']    = []
-        #         tmp['time']     = []
-        #         for topic, msg, t in self.bag.read_messages(topics=[self.topics[i],'numbers']):
-        #             tmp['time'].append(np.array([t.secs+t.nsecs*1e-9]))
-        #             tmp['position'].append(np.array([msg.position.x,
-        #                                                 msg.position.y,
-        #                                                 msg.position.z]))
-        #             tmp['velocity'].append(np.array([msg.velocity.x,
-        #                                                 msg.velocity.y,
-        #                                                 msg.velocity.z]))
-        #             tmp['euler'].append(np.array([msg.euler_angles.x,
-        #                                                 msg.euler_angles.y,
-        #                                                 msg.euler_angles.z]))
-        #         topic_name_ = self.topics[i].replace("/", "_")    
-        #         self.bag_data_[topic_name_[1:]] = tmp
-                
-        #     if self.topics[i] == '/qrotor_onboard/linear_accel_world':
-        #         print "Reading topic " + self.topics[i] + '\n'
-        #         tmp = {}
-        #         tmp['accel'] = []
-        #         tmp['time']     = []
-        #         for topic, msg, t in self.bag.read_messages(topics=[self.topics[i],'numbers']):
-        #             tmp['time'].append(np.array([t.secs+t.nsecs*1e-9]))
-        #             tmp['accel'].append(np.array([msg.x, msg.y, msg.z]))
-        #         topic_name_ = self.topics[i].replace("/", "_")    
-        #         self.bag_data_[topic_name_[1:]] = tmp
+        for i in parse_index:
+                print "Reading topic " + self.topics[i] + '\n'
+                tmp = {}
 
-        #     if self.topics[i] == '/qrotor_onboard/attitude':
-        #         print "Reading topic " + self.topics[i] + '\n'
-        #         tmp = {}
-        #         tmp['data'] = []
-        #         tmp['time']     = []
-        #         for topic, msg, t in self.bag.read_messages(topics=[self.topics[i],'numbers']):
-        #             tmp['time'].append(np.array([t.secs+t.nsecs*1e-9]))
-        #             tmp['data'].append(np.array([msg.roll, msg.pitch, msg.yaw, msg.gx, msg.gy, msg.gz]))
-        #         topic_name_ = self.topics[i].replace("/", "_")    
-        #         self.bag_data_[topic_name_[1:]] = tmp
+                for topic, msg, _ in self.bag.read_messages(topics=[self.topics[i],'numbers']):
+                    """ Recursively list the fields in each message """
+                    self.print_topic_fields(topic['topic'], msg, 0)
+                    break
+
+                tmp['accel'] = []
+                tmp['time']     = []
+                for topic, msg, t in self.bag.read_messages(topics=[self.topics[i],'numbers']):
+                    tmp['time'].append(np.array([t.secs+t.nsecs*1e-9]))
+                    tmp['accel'].append(np.array([msg.x, msg.y, msg.z]))
+
+                # renaming the topic for matlab    
+                topic_name_ = self.topics[i].replace("/", "_")    
+                self.data[topic_name_[1:]] = tmp
+
+
+                for topic, msg, t in self.bag.read_messages(topics=[self.topics[i],'numbers']):
+                    self.print_topic_fields(topic, msg, 0)
+                    print("i'm here")
+  
+
+    def print_topic_fields(self,field_name, msg, depth):
+        """ Recursive helper function for displaying information about a topic in a bag. This descends
+            through the nested fields in a message, an displays the name of each level. The indentation
+            increases depending on the depth of the nesting. As we recursively descend, we propagate the
+            field name.
+                There are three cases for processing each field in the bag.
+                1.  The field could have other things in it, for example a pose's translation may have
+                    x, y, z components. Check for this by seeing if the message has slots.
+                2.  The field could be a vector of other things. For instance, in the message file we
+                    could have an array of vectors, like geometry_msgs/Vector[] name. In this case,
+                    everything in the vector has the same format, so just look at the first message to
+                    extract the fields within the list.
+                3.  The field could be a terminal leaf in the message, for instance the nsecs field in a
+                    header message. Just display the name.
+        """
+        if hasattr(msg, '__slots__'):
+            """ This level of the message has more fields within it. Display the current
+                    level, and continue descending through the structure.
+            """
+            print(' ' * (depth * 2) + field_name)
+            for slot in msg.__slots__:
+                self.print_topic_fields(slot, getattr(msg, slot), depth + 1)
+        elif isinstance(msg, list):
+            """ We found a vector of field names. Display the information on the current
+                    level, and use the first element of the vector to display information
+                    about its content
+            """
+            if (len(msg) > 0) and hasattr(msg[0], '__slots__'):
+                print(' ' * (depth * 2) + field_name + '[]')
+                for slot in msg[0].__slots__:
+                    self.print_topic_fields(slot, getattr(msg[0], slot), depth + 1)
+        else:
+            """ We have reached a terminal leaf, i.e., and field with an actual value attached.
+                    Just print the name at this point.
+            """
+            print(' ' * (depth * 2) + field_name)
 
     def save_to(self,save_to_file_='rosbag.mat'):
-        sio.savemat(save_to_file_,self.bag_data_)
+        sio.savemat(save_to_file_,self.data)
 
 
-
+if __name__ == '__main__':
+    print('to do: adding argument parser')
 
 
