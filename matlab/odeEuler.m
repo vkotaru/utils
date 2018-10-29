@@ -1,6 +1,6 @@
-function [t,y] = ODEeuler(dydt, tspan, y0, h,varargin)
+function [sol] = odeEuler(dydt, tspan, y0, h,varargin)
 %eulode: Euler ODE solver
-%   [t,y] = eulode(dydt, tspan, y0, h, p1, p2,...)
+%   [t,y] = odeEuler(dydt, tspan, y0, h, p1, p2,...)
 %   `   uses EULER'S method to INTEGRATE an ODE
 %       (uses the slope at the beginning of the stepsize to graph the
 %       function.)
@@ -52,5 +52,8 @@ for i = 1:n-1 %implement Euler's Method
     y(i+1,:) = y(i,:) + dy'*h;
 end
 
+%% output
+sol.x = t;
+sol.y = y';
 
 end
