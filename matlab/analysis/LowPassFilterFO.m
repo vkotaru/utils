@@ -1,21 +1,22 @@
 classdef LowPassFilterFO < handle
    
 properties 
-    dim
-    alpha
+    dim    = 3
+    alpha  = 30
     sample
 end
 
 %%
 methods
-    function obj = LowPassFilterFO(dim, a)
-        obj.alpha = a.*ones(dim,1);
+    function obj = LowPassFilterFO(a)
+        obj.alpha = a.*ones(3,1);
+        obj.sample = zeros(3,1);
     end
     
-    function [filtered_sample] = update(obj, dt, new_sample)
-        filtered_sample = (1-dt*obj.alpha).*obj.sample + ...
+    function [lpf_sample] = apply(obj, dt, new_sample)
+        lpf_sample = (1-dt*obj.alpha).*obj.sample + ...
                             dt*obj.alpha.*new_sample;
-        obj.sample = filtered_sample;
+        obj.sample = lpf_sample;
     end
 end
     
