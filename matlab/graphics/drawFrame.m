@@ -41,7 +41,7 @@ grid on;
 xlabel('X');
 ylabel('Y');
 zlabel('Z');
-grid minor;
+% grid minor;
     
 view([30,30]);
     

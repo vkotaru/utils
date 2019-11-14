@@ -14,21 +14,28 @@ else
     color = 'k';
 end
 
-[lx, ly, lz] = deal(l(1),l(2),l(3));
-[cx, cy, cz] = deal(c(1),c(2),c(3));
+% [lx, ly, lz] = deal(l(1),l(2),l(3));
+% [cx, cy, cz] = deal(c(1),c(2),c(3));
 
 p = [];
 for i = 1:2
     for j = 1:2
-        for k = 1:2
-           p = [p; [cx+(lx/2)*(-1)^i, cy+(ly/2)*(-1)^j, cz+(lz/2)*(-1)^k]]; 
+        if dim > 2
+            for k = 1:2
+               p = [p; [c(1)+(l(1)/2)*(-1)^i, c(2)+(l(2)/2)*(-1)^j, c(3)+(l(2)/2)*(-1)^k]]; 
+            end
+        else
+            p = [p; [c(1)+(l(1)/2)*(-1)^i, c(2)+(l(2)/2)*(-1)^j]];             
         end
     end
 end
 
 hold on;
 if dim == 2
-    warning('complete this section of the code');
+    scatter(p(:,1),p(:,2), 'MarkerEdgeColor',color,...
+            'MarkerFaceColor',[0 .25 .25]); hold on;
+        p_ = [p(1,:); p(2,:); p(4,:); p(3,:); p(1,:)];
+        plot(p_(:,1), p_(:,2), color,'linewidth',1);
 elseif dim == 3
     scatter3(p(:,1),p(:,2),p(:,3), 'MarkerEdgeColor',color,...
         'MarkerFaceColor',[0 .25 .25]); hold on;
