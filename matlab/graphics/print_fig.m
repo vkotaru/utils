@@ -43,6 +43,7 @@ end
 set(fig_handle, 'PaperPositionMode', 'manual');
 set(fig_handle, 'PaperUnits', 'inches');
 set(fig_handle, 'PaperPosition', opts.print_pos_sz); 
+get(fig_handle);
 print(opts.print.filename,opts.print.ext,'-r300');%
 
 if nargin > 1
