@@ -32,8 +32,8 @@ opts_default.print.filename = 'tmp_image';
 opts_default.print.ext = '-depsc';
 
 %% extracting information
-
-opts = struct_overlay(opts_default, opts_in);
+options = struct('Recursive', true, 'AllowNew', true);
+opts = struct_overlay(opts_default, opts_in, options);
 % verifying print options
 if isempty(opts.print_pos_sz)
     opts.print_pos_sz = opts.print.pos_sz_stored{opts.print.index};
@@ -43,6 +43,9 @@ end
 set(fig_handle, 'PaperPositionMode', 'manual');
 set(fig_handle, 'PaperUnits', 'inches');
 set(fig_handle, 'PaperPosition', opts.print_pos_sz); 
+% set(fig_handle, 'OuterPosition', opts.print_out_sz);
+pause(0.1);
+get(fig_handle);
 print(opts.print.filename,opts.print.ext,'-r300');%
 
 if nargin > 1
