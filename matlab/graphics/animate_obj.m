@@ -70,20 +70,20 @@ opts = struct_overlay(opts_default,opts_in, options_struct_overlay);
     end
 
     % calculate screen offsets
-    screen_x_offset = (screen_width - screen_factor*figure_x_size)/2;
-    screen_y_offset = (screen_height - screen_factor*figure_y_size)/2;
+    screen_x_offset = 0*(screen_width - screen_factor*figure_x_size)/2;
+    screen_y_offset = 0*(screen_height - screen_factor*figure_y_size)/2;
 
     % draw figure and axes
     set(fig_handle,'Position', [screen_x_offset screen_y_offset...
         opts.figure.scale*screen_factor*figure_x_size...
         opts.figure.scale*screen_factor*figure_y_size]);
 %     set(fig_handle,'MenuBar', 'none');
-    axes1 = axes;
+    axes1 = gca;
     set(axes1,'XLim',opts.figure.x.limits,'YLim',opts.figure.y.limits, 'ZLim', opts.figure.z.limits);
 %     set(axes1,'Position',[0 0 1 1]);
 %     set(axes1,'Color','w');
 %     set(axes1,'TickDir','out');
-%     axis equal ;
+    axis equal ;
     
 
 %% extract data
@@ -133,8 +133,7 @@ end
 hist = opts.hist ;
 %% animate
     for i=1:length(t)
-        % drawQuadrotor(axes1, x(i,:)');
-        drawObject(axes1,x(i,:)'); hold on;
+        drawObject(axes1, x(i,:)'); hold on;
         
         if opts.box_flag
             drawBox(opts.box_dim, opts.box_center); hold on;
@@ -173,17 +172,20 @@ hist = opts.hist ;
         end
         alpha(0.4);
 %         plot3(x(max(1,i-hist):i, 1)-L*x(max(1,i-hist):i,7), x(max(1,i-hist):i, 2)-L*x(max(1,i-hist):i,8), x(max(1,i-hist):i, 3)-L*x(max(1,i-hist):i,9), 'r') ;
-%         s = sprintf('Running\n t = %1.2fs \n 1/%d realtime speed',t(i), RATE/25);
-%         text(x(i,1)-1.5,x(i,2)+1.5,s,'FontAngle','italic','FontWeight','bold');
 
         figure_x_limits_ = opts.figure.x.limits+opts.figure.moving*x(i,1);
         figure_y_limits_ = opts.figure.y.limits+opts.figure.moving*x(i,2);
         figure_z_limits_ = opts.figure.z.limits+opts.figure.moving*x(i,3);
+        
+        s = sprintf('t = %1.2f s',t(i));
+        text(x(i,1)+1, x(i,2)+1, s,'FontAngle','italic','FontWeight','bold');
+
         set(axes1,'XLim',figure_x_limits_,'YLim',figure_y_limits_,'ZLim',figure_z_limits_);
+
         hold on;
-        xlabel('X');
-        ylabel('Y');
-        zlabel('Z');
+        latex_xlabel('X');
+        latex_ylabel('Y');
+        latex_zlabel('Z');
         
         drawnow;        
 %         datacursormode(fig_handle);
@@ -203,23 +205,25 @@ end
 
 %%
 function [Et, Ex] = even_sample(t, x, Fs, type)
-if nargin < 4, type = 'linear'; end
+    if nargin < 4, type = 'linear'; end
 
-dt = diff(t);
-dt = dt + (dt==0)*1e-5;
-t = [0;cumsum(dt)];
+    dt = diff(t);
+    dt = dt + (dt==0)*1e-5;
+    t = [0;cumsum(dt)];
 
-% Obtain the process related parameters
-N = size(x, 2);    % number of signals to be interpolated
-M = size(t, 1);    % Number of samples provided
-t0 = t(1,1);       % Initial time
-tf = t(M,1);       % Final time
-EM = (tf-t0)*Fs;   % Number of samples in the evenly sampled case with
-                   % the specified sampling frequency
-Et = linspace(t0, tf, round(EM))';
-% Using linear interpolation (used to be cubic spline interpolation)
-% and re-sample each signal to obtain the evenly sampled forms
+    % Obtain the process related parameters
+    N = size(x, 2);    % number of signals to be interpolated
+    M = size(t, 1);    % Number of samples provided
+    t0 = t(1,1);       % Initial time
+    tf = t(M,1);       % Final time
+    EM = (tf-t0)*Fs;   % Number of samples in the evenly sampled case with
+                       % the specified sampling frequency
+    Et = linspace(t0, tf, round(EM))';
+    % Using linear interpolation (used to be cubic spline interpolation)
+    % and re-sample each signal to obtain the evenly sampled forms
     for s = 1:N
       Ex(:,s) = interp1(t(:,1), x(:,s), Et(:,1),type); 
     end
 end
+
+

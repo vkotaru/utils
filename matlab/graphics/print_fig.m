@@ -43,8 +43,11 @@ end
 set(fig_handle, 'PaperPositionMode', 'manual');
 set(fig_handle, 'PaperUnits', 'inches');
 set(fig_handle, 'PaperPosition', opts.print_pos_sz); 
+<<<<<<< HEAD
 % set(fig_handle, 'OuterPosition', opts.print_out_sz);
 pause(0.1);
+=======
+>>>>>>> e11a2f14f9065eec6947406ab59ff87c9eaada8a
 get(fig_handle);
 print(opts.print.filename,opts.print.ext,'-r300');%
 

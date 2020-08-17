@@ -21,6 +21,12 @@ end
 if nargin > 3
     linestyle = varargin{4};
 end
+if nargin > 3
+    linestyle = varargin{4};
+end
+if nargin > 4
+    linewidth = varargin{5};
+end
 
 e = [[length;0;0],[0;length;0],[0;0;length]];
     
