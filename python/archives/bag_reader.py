@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 """Bag reader.
+TODO: (find and refer the original source)
 
 This module reads all the rosmgs in a given a ros bag file. 
 
@@ -26,7 +27,7 @@ Todo:
     * Update this docstring
 
 """
-
+from __future__ import print_function
 import rospy, rosbag
 import os, sys, time, math, glob
 import warnings
@@ -82,12 +83,12 @@ class BagReader(object):
             parse_index = arg
 
         for i in parse_index:
-                print "Reading topic " + self.topics[i] + '\n'
+                print ("Reading topic " + self.topics[i] + '\n')
                 tmp = {}
 
                 for topic, msg, _ in self.bag.read_messages(topics=[self.topics[i],'numbers']):
                     """ Recursively list the fields in each message """
-                    self.print_topic_fields(topic['topic'], msg, 0)
+                    self.print_topic_fields(topic[0], msg, 0)
                     break
 
                 tmp['accel'] = []

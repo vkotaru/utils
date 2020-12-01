@@ -1,1 +1,5 @@
+### installation
+```
+    pip install -e .
+```
 
