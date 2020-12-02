@@ -12,9 +12,10 @@ setup(
         "seaborn",
         "ipython",
         "quadprog",
-        "rosbag",
+        "pyrosbag",
         "argparse",
         "pathlib",
-        "pandas"
+        "pandas",
+        "pycryptodome"
     ],
 )
