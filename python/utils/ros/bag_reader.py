@@ -11,6 +11,7 @@ import numpy as np
 from rosbag.bag import Bag
 import scipy as sp 
 import matplotlib as plt
+import scipy.io as sio
 
 class BagReader(object):
     def __init__(self, _file=None, _args=None):
@@ -120,3 +121,7 @@ class BagReader(object):
                     Just print the name at this point.
             """
             print(' ' * (depth * 2) + field_name)
+
+    @staticmethod
+    def save_to(data, save_to_file_='rosbag.mat'):
+        sio.savemat(save_to_file_, data)

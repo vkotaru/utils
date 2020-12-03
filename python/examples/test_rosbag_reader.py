@@ -18,5 +18,5 @@ for topic, msg, _ in rb.bag.read_messages(topics=[rb.topics[0],'numbers']):
         break
     i+=1
 
-
+BagReader.save_to(_dict)
 print('done!')
