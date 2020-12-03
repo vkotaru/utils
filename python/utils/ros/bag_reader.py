@@ -13,6 +13,23 @@ import scipy as sp
 import matplotlib as plt
 import scipy.io as sio
 
+# TODO: move them to utils.common package
+def tic():
+    """
+    source: https://stackoverflow.com/questions/5849800/what-is-the-python-equivalent-of-matlabs-tic-and-toc-functions
+    Homemade version of matlab tic and toc functions
+    """
+    import time
+    global startTime_for_tictoc
+    startTime_for_tictoc = time.time()
+
+def toc():
+    import time
+    if 'startTime_for_tictoc' in globals():
+        print "Elapsed time is " + str(time.time() - startTime_for_tictoc) + " seconds."
+    else:
+        print "Toc: start time not set"
+
 class BagReader(object):
     def __init__(self, _file=None, _args=None):
         super(BagReader, self).__init__()
@@ -21,6 +38,7 @@ class BagReader(object):
         self.bag = None
         self.topics = None
         self.data = {}
+        self.ignore_msg_type_ = ['sensor_msgs/CameraInfo', 'sensor_msgs/Image']
         
         if _file == None:
             warnings.warn("bag filename is missing", UserWarning)
@@ -31,6 +49,17 @@ class BagReader(object):
         self.file = _file
         self.bag = self.get_bag(self.file)
         self.topics = self.get_topics(self.bag)
+    
+    def ignore_msg_type(self, msg_type_):
+        if isinstance(msg_type_, list):
+            for i in len(msg_type_):
+                self.ignore_msg_type_.append(msg_type_[i])
+        else:
+            self.ignore_msg_type_.append(msg_type_)
+
+    def approve_msg_type(self, msg_type_):
+        # TODO: find if msg_type_ is in ignore_msg_type_ and remove it if yes
+        pass
 
     @staticmethod
     def get_topics(bag):
@@ -51,9 +80,6 @@ class BagReader(object):
         for i in range(len(self.topics)):
             str = str + '\t' +  self.topics[i] + '\n'
         return str
-
-    def read(self, _args):
-        pass
 
     @staticmethod
     def identify_topic_fields(field_name, msg, depth):
@@ -122,6 +148,32 @@ class BagReader(object):
             """
             print(' ' * (depth * 2) + field_name)
 
-    @staticmethod
-    def save_to(data, save_to_file_='rosbag.mat'):
-        sio.savemat(save_to_file_, data)
+    def save_to(self, save_to_file_='rosbag.mat'):
+        sio.savemat(save_to_file_, self.data)
+
+    def read(self, _args=None):
+        print(self)
+        approved_topics = []
+        # identifying the message types
+        for i in range(len(self.topics)):
+            for topic, msg, _ in self.bag.read_messages(topics=[self.topics[i], 'numbers']):
+                if not msg._type in self.ignore_msg_type_:
+                    # self.print_topic_fields(topic, msg, 0)
+                    self.data[topic.replace("/", "_")] = self.identify_topic_fields(topic, msg, 0)
+                    approved_topics.append(self.topics[i])
+                else:
+                    print('\033[0;31m'+msg._type +  '\033[0m msg type is not supported\n'+'\033[0;33m'+topic + '\033[0m is skipped from converting to mat file')
+                break
+
+        # reading and converting approved topics
+        for i in range(len(approved_topics)): # TODO: parallelize this conversion
+            tic()
+            topic_ = approved_topics[i]
+            _dict = self.data[topic_.replace("/", "_")]
+            print('processing \033[0;34m'+topic_+'\033[0m')
+            for topic, msg, _ in self.bag.read_messages(topics=[topic_, 'numbers']):
+                self.append_msg(_dict, msg)
+            self.data[topic_.replace("/", "_")] = _dict
+            _dict = None
+            toc()
+        pass
