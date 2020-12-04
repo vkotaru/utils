@@ -1,10 +1,13 @@
+#!/usr/bin/python2
 import utils
 import argparse
 import  os
 
-def convert_bag2mat(_file):
+def convert_bag2mat(_file, ignore_msgs_=None):
     # read ros-bag file
     ros_bag_ = utils.ros.BagReader(_file.name)
+    if ignore_msgs_ is not None:
+        ros_bag_.ignore_msg_type(ignore_msgs_)
 
     # read rosbag
     ros_bag_.read()
@@ -14,10 +17,14 @@ def convert_bag2mat(_file):
 
 def main():
     parser = argparse.ArgumentParser(description='Process ros-bag to mat.')
-    parser.add_argument('-f', '--file', type=file, help='rosbag filename', required=True)
+    parser.add_argument('-f', '--file', type=file, nargs='+', help='rosbag filename', required=True)
+    parser.add_argument('-i', '--ignore', type=str, nargs='+', help='ros message types to be ignored')
 
     args = parser.parse_args()
-    convert_bag2mat(args.file)
+    for i in range(len(args.file)):
+        # processing rosbag
+        print('processing \033[0;32m'+args.file[i].name+'\033[0m')
+        convert_bag2mat(args.file[i], args.ignore)
 
 if __name__ == "__main__":
     main()

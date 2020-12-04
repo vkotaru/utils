@@ -12,6 +12,7 @@ from rosbag.bag import Bag
 import scipy as sp 
 import matplotlib as plt
 import scipy.io as sio
+import IPython as ip
 
 # TODO: move them to utils.common package
 def tic():
@@ -149,7 +150,7 @@ class BagReader(object):
             print(' ' * (depth * 2) + field_name)
 
     def save_to(self, save_to_file_='rosbag.mat'):
-        sio.savemat(save_to_file_, self.data)
+        sio.savemat(save_to_file_, {'data': self.data})
 
     def read(self, _args=None):
         print(self)
@@ -159,7 +160,7 @@ class BagReader(object):
             for topic, msg, _ in self.bag.read_messages(topics=[self.topics[i], 'numbers']):
                 if not msg._type in self.ignore_msg_type_:
                     # self.print_topic_fields(topic, msg, 0)
-                    self.data[topic.replace("/", "_")] = self.identify_topic_fields(topic, msg, 0)
+                    self.data[topic.replace("/", "_")[1:]] = self.identify_topic_fields(topic, msg, 0)
                     approved_topics.append(self.topics[i])
                 else:
                     print('\033[0;31m'+msg._type +  '\033[0m msg type is not supported\n'+'\033[0;33m'+topic + '\033[0m is skipped from converting to mat file')
@@ -169,11 +170,11 @@ class BagReader(object):
         for i in range(len(approved_topics)): # TODO: parallelize this conversion
             tic()
             topic_ = approved_topics[i]
-            _dict = self.data[topic_.replace("/", "_")]
+            _dict = self.data[topic_.replace("/", "_")[1:]]
             print('processing \033[0;34m'+topic_+'\033[0m')
             for topic, msg, _ in self.bag.read_messages(topics=[topic_, 'numbers']):
                 self.append_msg(_dict, msg)
-            self.data[topic_.replace("/", "_")] = _dict
+            self.data[topic_.replace("/", "_")[1:]] = _dict
             _dict = None
             toc()
         pass
