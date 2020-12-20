@@ -7,5 +7,6 @@ build/
 *.egg-info/
 __pycache__/
 *.mat
+docs/
 
 
