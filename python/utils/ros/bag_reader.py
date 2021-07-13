@@ -1,6 +1,6 @@
 #!/usr/bin/env python2
 """
-bag_reader to a read and parse a rosbag
+bag_reader to read and parse a rosbag
 TODO: (find and cite the original source to the print_topic_fields function)
 """
 
@@ -13,6 +13,8 @@ import scipy as sp
 import matplotlib as plt
 import scipy.io as sio
 import IPython as ip
+import pickle
+
 
 # TODO: move them to utils.common package
 def tic():
@@ -30,6 +32,33 @@ def toc():
         print "Elapsed time is " + str(time.time() - startTime_for_tictoc) + " seconds."
     else:
         print "Toc: start time not set"
+        
+def convert_bag(_file, params=None):
+    """
+    function to read a bag file and save the data to a mat file
+    for instance, 
+    /path/to/file.bag is converted to /path/to/file.mat
+    @param [in] _file file name as a string
+    @param [in] ignore_msgs_ list of message types to be ignored during the conversion
+    """
+    # read ros-bag file
+    ros_bag_ = BagReader(_file.name)
+    if params['ignore_msgs'] is not None:
+        ros_bag_.ignore_msg_type(params['ignore_msgs'])
+
+    # read rosbag
+    ros_bag_.read()
+
+    # saving the data to *.mat file
+    if params['save_pickle']:
+        pickle_file_name = os.path.splitext(_file.name)[0]+'.p'
+        print('Saving to pickle file '+pickle_file_name)
+        ros_bag_.save_pickle(pickle_file_name)
+    else:
+        mat_file_name = os.path.splitext(_file.name)[0]+'.mat'
+        print('Saving to mat file '+mat_file_name)
+        ros_bag_.save_to(mat_file_name)
+
 
 class BagReader(object):
     def __init__(self, _file=None, _args=None):
@@ -39,7 +68,12 @@ class BagReader(object):
         self.bag = None
         self.topics = None
         self.data = {}
-        self.ignore_msg_type_ = ['sensor_msgs/CameraInfo', 'sensor_msgs/Image']
+        self.ignore_msg_type_ = ['sensor_msgs/CameraInfo', 
+                                 'sensor_msgs/Image', 
+                                 'rosgraph_msgs/Log', 
+                                 'tf2_msgs/TFMessage', 
+                                 'dynamic_reconfigure/ConfigDescription',
+                                 'dynamic_reconfigure/Config']
         
         if _file == None:
             warnings.warn("bag filename is missing", UserWarning)
@@ -151,6 +185,10 @@ class BagReader(object):
 
     def save_to(self, save_to_file_='rosbag.mat'):
         sio.savemat(save_to_file_, {'data': self.data})
+        
+    def save_pickle(self, save_to_file_='rosbag.p'):
+        pickle.dump(  {'data': self.data}, open( save_to_file_, "wb" ) )
+
 
     def read(self, _args=None):
         print(self)

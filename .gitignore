@@ -8,5 +8,6 @@ build/
 __pycache__/
 *.mat
 docs/
+.idea/
 
 
