@@ -4,12 +4,16 @@ bag_reader to read and parse a rosbag
 TODO: (find and cite the original source to the print_topic_fields function)
 """
 
-import rosbag 
-import os, sys, time, math, glob 
+import rosbag
+import os
+import sys
+import time
+import math
+import glob
 import warnings
 import numpy as np
 from rosbag.bag import Bag
-import scipy as sp 
+import scipy as sp
 import matplotlib as plt
 import scipy.io as sio
 import IPython as ip
@@ -26,13 +30,16 @@ def tic():
     global startTime_for_tictoc
     startTime_for_tictoc = time.time()
 
+
 def toc():
     import time
     if 'startTime_for_tictoc' in globals():
-        print "Elapsed time is " + str(time.time() - startTime_for_tictoc) + " seconds."
+        print("Elapsed time is " + str(time.time() -
+              startTime_for_tictoc) + " seconds.")
     else:
-        print "Toc: start time not set"
-        
+        print("Toc: start time not set")
+
+
 def convert_bag(_file, params=None):
     """
     function to read a bag file and save the data to a mat file
@@ -68,13 +75,14 @@ class BagReader(object):
         self.bag = None
         self.topics = None
         self.data = {}
-        self.ignore_msg_type_ = ['sensor_msgs/CameraInfo', 
-                                 'sensor_msgs/Image', 
-                                 'rosgraph_msgs/Log', 
-                                 'tf2_msgs/TFMessage', 
+        self.ignore_msg_type_ = ['sensor_msgs/CameraInfo',
+                                 'sensor_msgs/Image',
+                                 'rosgraph_msgs/Log',
+                                 'tf2_msgs/TFMessage',
                                  'dynamic_reconfigure/ConfigDescription',
-                                 'dynamic_reconfigure/Config']
-        
+                                 'dynamic_reconfigure/Config',
+                                 'std_msgs/Float64MultiArray']
+
         if _file == None:
             warnings.warn("bag filename is missing", UserWarning)
         else:
@@ -84,7 +92,7 @@ class BagReader(object):
         self.file = _file
         self.bag = self.get_bag(self.file)
         self.topics = self.get_topics(self.bag)
-    
+
     def ignore_msg_type(self, msg_type_):
         if isinstance(msg_type_, list):
             for i in len(msg_type_):
@@ -98,22 +106,22 @@ class BagReader(object):
 
     @staticmethod
     def get_topics(bag):
-        return bag.get_type_and_topic_info()[1].keys()
+        return list(bag.get_type_and_topic_info()[1].keys())
 
     @staticmethod
     def get_bag(filename):
         return rosbag.Bag(filename)
-        
+
     def clear(self):
-        self.name   = None
-        self.bag    = None
+        self.name = None
+        self.bag = None
         self.topics = None
-        self.data   = {}
+        self.data = {}
 
     def __str__(self):
         str = 'List of Topics in the bag:\n'
         for i in range(len(self.topics)):
-            str = str + '\t' +  self.topics[i] + '\n'
+            str = str + '\t' + self.topics[i] + '\n'
         return str
 
     @staticmethod
@@ -121,13 +129,15 @@ class BagReader(object):
         if hasattr(msg, '__slots__'):
             d = {}
             for slot in msg.__slots__:
-                d[slot] = BagReader.identify_topic_fields(slot, getattr(msg, slot), depth + 1)
+                d[slot] = BagReader.identify_topic_fields(
+                    slot, getattr(msg, slot), depth + 1)
             return d
         elif isinstance(msg, list):
             if (len(msg) > 0) and hasattr(msg[0], '__slots__'):
                 l = []
                 for slot in msg[0].__slots__:
-                    l.append(BagReader.identify_topic_fields(slot, getattr(msg[0], slot), depth + 1))
+                    l.append(BagReader.identify_topic_fields(
+                        slot, getattr(msg[0], slot), depth + 1))
                 return {field_name: l}
         else:
             return []
@@ -167,7 +177,8 @@ class BagReader(object):
             """
             print(' ' * (depth * 2) + field_name)
             for slot in msg.__slots__:
-                BagReader.print_topic_fields(slot, getattr(msg, slot), depth + 1)
+                BagReader.print_topic_fields(
+                    slot, getattr(msg, slot), depth + 1)
         elif isinstance(msg, list):
             """ We found a vector of field names. Display the information on the current
                     level, and use the first element of the vector to display information
@@ -176,7 +187,8 @@ class BagReader(object):
             if (len(msg) > 0) and hasattr(msg[0], '__slots__'):
                 print(' ' * (depth * 2) + field_name + '[]')
                 for slot in msg[0].__slots__:
-                    BagReader.print_topic_fields(slot, getattr(msg[0], slot), depth + 1)
+                    BagReader.print_topic_fields(
+                        slot, getattr(msg[0], slot), depth + 1)
         else:
             """ We have reached a terminal leaf, i.e., and field with an actual value attached.
                     Just print the name at this point.
@@ -185,10 +197,9 @@ class BagReader(object):
 
     def save_to(self, save_to_file_='rosbag.mat'):
         sio.savemat(save_to_file_, {'data': self.data})
-        
-    def save_pickle(self, save_to_file_='rosbag.p'):
-        pickle.dump(  {'data': self.data}, open( save_to_file_, "wb" ) )
 
+    def save_pickle(self, save_to_file_='rosbag.p'):
+        pickle.dump({'data': self.data}, open(save_to_file_, "wb"))
 
     def read(self, _args=None):
         print(self)
@@ -198,14 +209,16 @@ class BagReader(object):
             for topic, msg, _ in self.bag.read_messages(topics=[self.topics[i], 'numbers']):
                 if not msg._type in self.ignore_msg_type_:
                     # self.print_topic_fields(topic, msg, 0)
-                    self.data[topic.replace("/", "_")[1:]] = self.identify_topic_fields(topic, msg, 0)
+                    self.data[topic.replace(
+                        "/", "_")[1:]] = self.identify_topic_fields(topic, msg, 0)
                     approved_topics.append(self.topics[i])
                 else:
-                    print('\033[0;31m'+msg._type +  '\033[0m msg type is not supported\n'+'\033[0;33m'+topic + '\033[0m is skipped from converting to mat file')
+                    print('\033[0;31m'+msg._type + '\033[0m msg type is not supported\n' +
+                          '\033[0;33m'+topic + '\033[0m is skipped from converting to mat file')
                 break
 
         # reading and converting approved topics
-        for i in range(len(approved_topics)): # TODO: parallelize this conversion
+        for i in range(len(approved_topics)):  # TODO: parallelize this conversion
             tic()
             topic_ = approved_topics[i]
             _dict = self.data[topic_.replace("/", "_")[1:]]
