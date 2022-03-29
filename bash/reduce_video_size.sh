@@ -1,0 +1,1 @@
+ffmpeg -i ${1} -vcodec libx265 -crf ${2} ${1}_reduced.mp4
