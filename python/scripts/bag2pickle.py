@@ -229,7 +229,7 @@ class BagReader(object):
                     print('Skipping \033[0;33m'+topic + '\033[0m; ' + '\033[0;31m' +
                           msg._type + '\033[0m msg type is not supported')
                 elif topic in self.ignore_msg_topics_:
-                    print('Skipping \033[0;33m'+topic)
+                    print('Skipping topic \033[0;33m'+topic + '\033[0m; ')
                 else:
                     self.data[topic.replace(
                         "/", "_")[1:]] = self.identify_topic_fields(topic, msg, 0)
@@ -269,7 +269,7 @@ def convert_bag(filename, args):
     if args['ignore_msgs'] is not None:
         ros_bag_.ignore_msg_type(args['ignore_msgs'])
     if args['ignore_topics'] is not None:
-        ros_bag_.ignore_msg_type(args['ignore_topics'])
+        ros_bag_.ignore_msg_topic(args['ignore_topics'])
 
     # read rosbag
     ros_bag_.read()
@@ -303,6 +303,7 @@ if __name__ == '__main__':
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-p', '--path', nargs='+', default='.',
                         help='Path of a file or a folder of files.')
+    parser.add_argument('-t', '--topic', nargs='+', default='.', help="topics to debag")  
 
     parser.add_argument('-im', '--ignore_msgs', type=str, nargs='+',
                         help='ros message types to be ignored')

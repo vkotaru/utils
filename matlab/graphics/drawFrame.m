@@ -52,10 +52,10 @@ scatter3(R2(1,2),R2(2,2),R2(3,2),10, 'MarkerEdgeColor','k',...
 scatter3(R2(1,3),R2(2,3),R2(3,3),10, 'MarkerEdgeColor','k',...
     'MarkerFaceColor',[0. .0 .75]);
 
-grid on; 
-xlabel('X');
-ylabel('Y');
-zlabel('Z');
+% grid on; 
+% xlabel('X');
+% ylabel('Y');
+% zlabel('Z');
 % grid minor;
     
 % view([30,30]);
